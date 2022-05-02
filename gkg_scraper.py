@@ -4,12 +4,14 @@ Created on Tue Apr 26 14:08:26 2022
 
 @author: filip
 """
+import warnings
+warnings.filterwarnings('ignore')
 import pandas as pd
 import os 
-import shutil
+#import shutil
 import goose3
-import numpy as np
-import requests
+#import numpy as np
+#import requests
 import datetime
 import wget
 
@@ -41,25 +43,34 @@ while start_date <= end_date:
         start_date += delta
 print("Downloading finished")
  
+
 GKG_=pd.read_csv("F:\\GKG_Raw" + '\\' +  ymd + endurl , compression='zip', delimiter= '\t')
+
 
 GKG_['Climate_Change'] = pd.Series([False for x in range(len(GKG_.index))])
 GKG_['Climate_Finance']= pd.Series([False for x in range(len(GKG_.index))])
-GKG_['Urban']= pd.Series([False for x in range(len(GKG_.index))])
-GKG_['ECON']= pd.Series([False for x in range(len(GKG_.index))])
 GKG_['GREEN_ENERGY']= pd.Series([False for x in range(len(GKG_.index))])
-GKG_['BROWN_ENERGY']= pd.Series([False for x in range(len(GKG_.index))])
-GKG_['INNO']= pd.Series([False for x in range(len(GKG_.index))])
-GKG_['ENV']= pd.Series([False for x in range(len(GKG_.index))])
+#GKG_['BROWN_ENERGY']= pd.Series([False for x in range(len(GKG_.index))])
+GKG_['NAT_RES']= pd.Series([False for x in range(len(GKG_.index))])
+GKG_['CRIMEDISASTER']= pd.Series([False for x in range(len(GKG_.index))])
+GKG_['EnvHealth']= pd.Series([False for x in range(len(GKG_.index))])
+GKG_['ENV_POL_MAN']= pd.Series([False for x in range(len(GKG_.index))])
+GKG_['Climate_Science']= pd.Series([False for x in range(len(GKG_.index))])
+GKG_['Urban_RE']= pd.Series([False for x in range(len(GKG_.index))])
+GKG_['Green_Econ']= pd.Series([False for x in range(len(GKG_.index))])
+
+
 
 for i in range(0, len(GKG_.THEMES)-1):
     s=pd.Series(GKG_.THEMES[i])
     tof=s.isna()
+    
     if  tof[0]==True:     
         pass
     else:
         split=s.str.split(r";", expand=True)
         for k in range(0, split.size-1):
+            
             if (split[k][0] == ('WB_567_CLIMATE_CHANGE' 
                                 or 'ENV_CLIMATECHANGE'
                                 or 'UNGP_CLIMATE_CHANGE_ACTION' 
@@ -71,7 +82,8 @@ for i in range(0, len(GKG_.THEMES)-1):
                                 or 'WB_747_SOCIAL_RESILIENCE_AND_CLIMATE_CHANGE'
                                 or 'WB_1839_OZONE_LAYER_DEPLETION_AND_CLIMATE_CHANGE'
                                 or 'WB_575_COMMUNITY_BASED_CLIMATE_ADAPTATION'
-                                or 'WB_1750_CLIMATE_CHANGE_ADAPTATION_IMPACTS')) == True :
+                                or 'WB_1750_CLIMATE_CHANGE_ADAPTATION_IMPACTS'
+                                )) == True :
                 GKG_['Climate_Change'][i]=True
                 
             elif (split[k][0] == ('WB_1847_CLIMATE_FINANCE'	 
@@ -83,79 +95,109 @@ for i in range(0, len(GKG_.THEMES)-1):
                                   or 'WB_582_GREENHOUSE_GAS_ACCOUNTING'
                                   )) == True :
                 GKG_['Climate_Finance'][i]=True
-        
-            elif  (split[k][0] == ('' ))== True:
-                GKG_['ECON'][i]=True
-        
-
+                
+           # elif  (split[k][0] == ('ENV_OIL' 
+            #                       or 'ENV_COAL'
+             #                      or 'ENV_NATURALGAS'
+              #                     or 'ENV_NUCLEARPOWER'))== True:
+               # GKG_['BROWN_ENERGY'][i]=True
+               # flag=True
             elif  (split[k][0] == ('ENV_WINDPOWER' 
                                    or 'ENV_SOLAR' 
                                    or 'ENV_HYDRO' 
                                    or 'ENV_BIOFUEL' 
-                                   or 'ENV_GEOTHERMAL'))== True:
-                GKG_['GREEN_ENERGY'][i]=True
-            
+                                   or 'ENV_GEOTHERMAL'
+                                   or 'WB_525_RENEWABLE_ENERGY'
+                                   ))== True:
                 
+                GKG_['GREEN_ENERGY'][i]=True
+               
+            elif (split[k][0] == ('ENV_METALS'
+                                  or 'ENV_MINING'
+                                  or 'ENV_FISHERY'
+                                  or 'ENV_FORESTRY'
+                                  or 'ENV_WATERWAYS'
+                                  or 'WB_566_ENVIRONMENT_AND_NATURAL_RESOURCES'
+                                  or 'WB_897_MINING_ENVIRONMENTAL_MANAGEMENT'
+                                  or 'ENV_DEFORESTATION' 
+                                  or 'ENV_OVERFISH'
+                                  ))==True:
+                GKG_['NAT_RES'][i]=True
+                
+            elif (split[k][0] == (
+                                   'MANMADE_DISASTER_ENVIRONMENTAL_DISASTER'
+                                  or 'WB_1831_ENVIRONMENTAL_CRIME_AND_LAW_ENFORCEMENT'
+                                  or 'WB_2916_ENVIRONMENTAL_LAW_ENFORCEMENT'
+                                  or 'WB_2915_ENVIRONMENTAL_CRIME'
+                                  or 'MANMADE_DISASTER_MARITIME_ENVIRONMENTAL_DISASTER'
+                                  or 'SELF_IDENTIFIED_ENVIRON_DISASTER'
+                                  or 'WB_1936_ENVIRONMENTAL_CRIME_ENFORCEMENT'
+                                  ))==True:
+                GKG_['CRIMEDISASTER'][i]=True
+                
+            elif (split[k][0] ==('WB_901_ENVIRONMENTAL_SAFEGUARDS'
+                                 or 'WB_849_ENVIRONMENTAL_LAWS_AND_REGULATIONS'
+                                 or 'WB_1785_ENVIRONMENTAL_POLICIES_AND_INSTITUTION'
+                                 or 'ECON_DEVELOPMENTORGS_UNITED_NATIONS_ENVIRONMENT_PROGRAMME'
+                                 or 'WB_1782_ENVIRONMENTAL_AGREEMENTS_AND_CONVENTIONS'
+                                 or 'WB_1783_ENVIRONMENTAL_GOVERNANCE'
+                                 or 'WB_2307_ENVIRONMENTAL_MANAGEMENT_AND_MITIGATION_PLANS'
+                                 or 'WB_2306_ENVIRONMENTAL_IMPACT_ASSESSEMENT'
+                                 or 'WB_1376_ENVIRONMENTAL_OFFSETS'
+                                 or 'WB_157_ENVIRONMENTAL_WATER_USE_AND_CATCHMENT_PROTECTION'
+                                 or 'WB_1378_PAYMENT_FOR_ENVIRONMENT_SERVICES'
+                                 or 'WB_2195_ENVIROMENTAL_IMPACT_ASSESSMENT'
+                                 or 'WB_598_ENVIRONMENTAL_MANAGEMENT'
+                                 or 'WB_526_RENEWABLE_ENERGY_POLICY_AND_REGULATION'
+                                 or 'WB_1057_SUSTAINABLE_FOREST_MANAGEMENT'
+                    ))== True:
+                GKG_['ENV_POL_MAN'][i]=True
+                
+            elif (split[k][0] ==( 'WB_1792_ENVIRONMENTAL_HEALTH'
+                                 or 'WB_1717_URBAN_POLLUTION_AND_ENVIRONMENTAL_HEALTH'
+                    ))== True:
+                GKG_['EnvHealth'][i]=True
+                
+            elif (split[k][0] ==('WB_2197_ENVIRONMENTAL_ENGINEERING'
+                                 or 'ENV_CARBONCAPTURE'
+                                 or 'WB_571_CLIMATE_SCIENCE'
+                                 or 'WB_1784_ENVIRONMENTAL_INFORMATION_MANAGEMENT'
+                                 or 'WB_399_INNOVATION_FOR_GREEN_GROWTH'
+                    ))== True:
+                GKG_['Climate_Science'][i] = True
+                
+                
+            elif (split[k][0] == ( 'WB_476_GREEN_GROWTH'                      
+                                  or 'WB_2674_GREEN_JOBS'
+                                  or 'WB_1100_SUSTAINABLE_GROWTH'
+                                  or 'WB_1856_TRADE_AND_THE_ENVIRONMENT'
+                                  or 'WB_791_TRANSPORT_IMPACT_ON_THE_ENVIRONMENT'
+                    ))== True:
+                GKG_['Green_Econ'][i] = True          
+                
+            elif (split[k][0] == ( 'WB_802_GREEN_CITIES'
+                                  or 'WB_408_GREEN_BUILDINGS'
+                    ))== True:
+                GKG_['Urban_RE'][i] = True
+                
+        
+        
+        
+
     
- 
-            
-            
-            
-            
-            
-ENV_OIL
-ENV_MINING
-ENV_COAL
-ENV_NATURALGAS
-ENV_NUCLEARPOWER
 
-ENV_METALS
-ENV_FISHERY
-ENV_FORESTRY
-ENV_WATERWAYS
-WB_566_ENVIRONMENT_AND_NATURAL_RESOURCES
-WB_897_MINING_ENVIRONMENTAL_MANAGEMENT
+# TODO : data cleaning and storage;
 
-ENV_SPECIESENDANGERED (CONDITIONAL)
+GKG_['flag'] = pd.Series([False for x in range(len(GKG_.index))])
+GKG_['flag'] = GKG_['Climate_Change'] + GKG_['Climate_Finance'] 
++ GKG_['GREEN_ENERGY'] + GKG_['NAT_RES'] + GKG_['CRIMEDISASTER'] 
++ GKG_['EnvHealth'] + GKG_['ENV_POL_MAN'] + GKG_['Climate_Science'] 
++ GKG_['Urban_RE']+GKG_['Green_Econ']
 
-ENV_DEFORESTATION
-ENV_OVERFISH
-MANMADE_DISASTER_ENVIRONMENTAL_DISASTER
-WB_1831_ENVIRONMENTAL_CRIME_AND_LAW_ENFORCEMENT
-WB_2916_ENVIRONMENTAL_LAW_ENFORCEMENT
-WB_2915_ENVIRONMENTAL_CRIME
-MANMADE_DISASTER_MARITIME_ENVIRONMENTAL_DISASTER
-SELF_IDENTIFIED_ENVIRON_DISASTER
-WB_1936_ENVIRONMENTAL_CRIME_ENFORCEMENT
-WB_1792_ENVIRONMENTAL_HEALTH
-WB_1388_ENVIRONMENTAL_AND_SOCIAL_ASSESSMENTS (CONDITIONAL)
-WB_1717_URBAN_POLLUTION_AND_ENVIRONMENTAL_HEALTH
-
-
-WB_901_ENVIRONMENTAL_SAFEGUARDS
-WB_849_ENVIRONMENTAL_LAWS_AND_REGULATIONS
-WB_1785_ENVIRONMENTAL_POLICIES_AND_INSTITUTION
-ECON_DEVELOPMENTORGS_UNITED_NATIONS_ENVIRONMENT_PROGRAMME
-WB_1782_ENVIRONMENTAL_AGREEMENTS_AND_CONVENTIONS
-WB_1783_ENVIRONMENTAL_GOVERNANCE
-WB_2307_ENVIRONMENTAL_MANAGEMENT_AND_MITIGATION_PLANS
-WB_2306_ENVIRONMENTAL_IMPACT_ASSESSEMENT
-WB_1376_ENVIRONMENTAL_OFFSETS
-WB_157_ENVIRONMENTAL_WATER_USE_AND_CATCHMENT_PROTECTION
-WB_1378_PAYMENT_FOR_ENVIRONMENT_SERVICES
-WB_2195_ENVIROMENTAL_IMPACT_ASSESSMENT
-WB_598_ENVIRONMENTAL_MANAGEMENT
-WB_1856_TRADE_AND_THE_ENVIRONMENT
-WB_791_TRANSPORT_IMPACT_ON_THE_ENVIRONMENT
-
-WB_2197_ENVIRONMENTAL_ENGINEERING
-ENV_CARBONCAPTURE
-TAX_FNCACT_ENVIRONMENTAL_SCIENTIST
-WB_571_CLIMATE_SCIENCE
-WB_1784_ENVIRONMENTAL_INFORMATION_MANAGEMENT
-
-
-ENV_SPECIESEXTINCT (CONDITIONAL)
-
-
-
+cleanGKG = GKG_[GKG_['flag']>0]
+del cleanGKG['DATE']
+del cleanGKG['COUNTS']
+del cleanGKG['LOCATIONS']
+del cleanGKG['PERSONS']
+del cleanGKG['CAMEOEVENTID']
+del cleanGKG['flag']
