@@ -22,7 +22,7 @@ import seaborn as sns
 
 
 classifier=pipeline("zero-shot-classification", model="valhalla/distilbart-mnli-12-1")
-candidate_labels = ['renewable',"energy", "economy", "climate change", "sustainability", "climate finance", "opinion"]
+candidate_labels = ["climate", "environmental","sustainable","renewable","finance"]
 
 
 
@@ -51,16 +51,22 @@ while start_date <= end_date:
     ymd=year+month+day
     delt_zip=baseurl+ymd+endurl
     if  os.path.exists("F:\\cleanGKG" + '\\' +  ymd + endurl_clean):
-        cleanGKG=pd.read_csv("F:\\cleanGKG" + '\\' +  ymd + endurl_clean , compression='zip', delimiter= '\t')
+        cleanGKG=pd.read_csv("F:\\cleanGKG" + '\\' +  ymd + endurl_clean , compression='zip')
         cleanGKG.BERT_Class=pd.Series([float("nan") for x in range(len(cleanGKG.index))])
         cleanGKG.BERT_Sent=pd.Series([float("nan") for x in range(len(cleanGKG.index))])
         for i in range(0, len(cleanGKG.THEMES)-1):    
-            src=goose.extract(cleanGKG.SOURCEURL[i])
-            if len(src.cleaned_text)>300:
-                results=classifier(src.cleaned_text, candidate_labels)
+            try:
+                src=goose.extract(cleanGKG.SOURCEURLS[i])
+            
+                if len(src.cleaned_text)>500:
+                    results=classifier(src.cleaned_text, candidate_labels, multi_label= True)
+                    print(results['labels'])
+                    print(results['scores'])
+            except:
+                pass
         start_date += delta
     else :
         print("F:\\GKG_Raw" + '\\' +  ymd + endurl_clean + " does not  exits!" )
         start_date += delta
-print(results)
+
  
